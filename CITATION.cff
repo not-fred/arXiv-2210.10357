@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+title: >-
+  Script used in: Dynamic-based Entanglement Witnesses for
+  Non-Gaussian States of Harmonic Oscillators
+  [arXiv-2210.10357]
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Lin Htoo
+    family-names: Zaw
+    orcid: 'https://orcid.org/0000-0003-1559-6903'
+repository-code: 'https://github.com/not-fred/arXiv-2210.10357'
+abstract: >-
+  Script used in
+  [arXiv:2210.10357](https://arxiv.org/abs/2210.10357) for
+  minimizing entanglement over positive partial transpose
+  states, to find the threshold for a dynamic-based
+  entanglement witness. See the paper for more detail.

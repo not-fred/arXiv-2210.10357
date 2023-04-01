@@ -2,7 +2,7 @@
     julia SDP-min-entanglement.jl 𝐧 θ P₃ [file]
 
 Script used in [arXiv:2210.10357](https://arxiv.org/abs/2210.10357) for minimizing
-entanglement over positive partial tranpose states, to find the threshold for a
+entanglement over positive partial transpose states, to find the threshold for a
 dynamic-based entanglement witness. See the paper for more detail.
 
 # Arguments
@@ -52,7 +52,7 @@ end
 """
     sgnX(n₁,n₂)
 
-Returns ⟨n₁|sgn(X)|n₂⟩; see Eq. (D11) of arXiv:2204.10498 [quant-ph]
+Returns ⟨n₁|sgn(X)|n₂⟩; see Eq. (D11) of [arXiv:2204.10498](https://arxiv.org/abs/2204.10498)
 """
 function sgnX(n₁,n₂)
     if (n₁-n₂)%2 == 0
@@ -102,7 +102,7 @@ end
 
 Defines the generalised GellMann matrices (GMM) fₖⱼ of dimension `d`, which forms
 part of the Hermitian orthonormal basis operators as defined in Eqs. (3)—(5) of
-[arXiv:0806.1174](https://arxiv.org/abs/0806.1174). When `k` = `j`, the diagonal GMMs are returned; when
+[arXiv:0806.1174](https://arxiv.org/abs/0806.1174). When `k` = `j`, the diagonal GMMs are returned;
 the symmetric GMM when `k` < `j`; and the antisymmetric GMM when `k` > `j`.
 """
 function GellMann_f(k,j,d)
@@ -141,13 +141,13 @@ end
 """
     pTranspose(ρ,d₁::Int=Int(√size(ρ)[1]),d₂::Int=Int(√size(ρ)[1]))
 
-Returns the partial transpose of `ρ`, defined by ⟨n₁,n₂|ρ^(Γ2)|m₁,m₂⟩ = ⟨n₁,m₂|ρ|m₁,n₂⟩
+Returns the partial transpose of `ρ`, defined by ⟨n₁,n₂|ρᵀ²|m₁,m₂⟩ = ⟨n₁,m₂|ρ|m₁,n₂⟩
 """
 function pTranspose(ρ,d₁::Int=Int(√size(ρ)[1]),d₂::Int=Int(√size(ρ)[1]))
     ρᵀ² = copy(ρ)*0
     for n₁ ∈ 0:d₁-1, n₂ ∈ 0:d₂-1, m₁ ∈ 0:d₁-1, m₂ ∈ 0:d₂-1
-        # ⟨n₁,n₂|ρ^(Γ2)|m₁,m₂⟩ = ⟨n₁,m₂|ρ|m₁,n₂⟩
-        ρᵀ²[n₁*d₁ + n₂ + 1, m₁*d₁ + m₂ + 1] = ρ[n₁*d₁ + m₂ + 1, m₁*d₁ + n₂ + 1]
+        # ⟨n₁,n₂|ρᵀ²|m₁,m₂⟩ = ⟨n₁,m₂|ρ|m₁,n₂⟩
+        ρᵀ²[n₁*d₂ + n₂ + 1, m₁*d₂ + m₂ + 1] = ρ[n₁*d₂ + m₂ + 1, m₁*d₂ + n₂ + 1]
     end
     return ρᵀ²
 end
@@ -162,8 +162,8 @@ U = BS(θ,𝐧=𝐧)
 ind₁₂ = round.(Int,range(1, (𝐧+1)^4,length=numThreads+1))
 ind₊₋ = round.(Int,range(1,(2𝐧+1)^4,length=numThreads+1))
 
-# These will be exactly the B⃗B⃗, B⃗B⃗^(Γ2) and A⃗A⃗ defined in the supplementary. B⃗B⃗
-# is written in the {a₊,a₋} basis, while B⃗B⃗^(Γ2) and A⃗A⃗ is in the {a₁,a₂} basis.
+# These will be exactly the B⃗B⃗, B⃗B⃗ᵀ² and A⃗A⃗ defined in the supplementary. B⃗B⃗
+# is written in the {a₊,a₋} basis, while B⃗B⃗ᵀ² and A⃗A⃗ is in the {a₁,a₂} basis.
 # Also, AA₀₀ = A₀ ⊗ A₀, BB₀₀ = B₀ ⊗ B₀. Here, they are split by the thread
 BB   = [spzeros(ComplexF64, (𝐧+1)^4,ind₁₂[i+1]-ind₁₂[i]) for i ∈ 1:numThreads]
 BBᵀ² = [spzeros(ComplexF64,(2𝐧+1)^4,ind₁₂[i+1]-ind₁₂[i]) for i ∈ 1:numThreads]
@@ -264,10 +264,10 @@ for iP in 1:length(P₃)
     problem = minimize(2z-1,constraints)
     solve!(problem, optimizer)
 
-    # Evaluate tr(ρ^(Γ2)), making sure to normalise it.
+    # Evaluate tr(ρᵀ²), making sure to normalise it.
     tr_ρᵀ² = (evaluate(ρᵀ²)/tr(evaluate(ρᵀ²))) |> collect |> eigvals .|> abs |> sum
     outputStrings[iP] = "$𝐧,$θ,$(P₃[iP]),$tr_ρᵀ²"
-    
+
     # If it was specified, append the result into the file.
     if file != false
         open(file,"a") do io
